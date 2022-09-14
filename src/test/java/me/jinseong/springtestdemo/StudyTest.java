@@ -2,6 +2,19 @@ package me.jinseong.springtestdemo;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.AggregateWith;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.SimpleArgumentConverter;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 
@@ -139,7 +152,7 @@ class StudyTest {
 //    단위 테스트인 지, 통합 테스트인 지
     @Test
     @Tag("fast")
-    @DisplayName("7-1 @Tag 테스트")
+    @DisplayName("7-1. @Tag 테스트")
     void tag_test1() {
 //        Edit configurations 에서 Hint 타입을 tags 로 변경 후 태그값 설정
         System.out.println("StudyTest.tag_test");
@@ -147,22 +160,105 @@ class StudyTest {
 
     @Test
     @Tag("slow")
-    @DisplayName("7-1 @Tag 테스트")
+    @DisplayName("7-1. @Tag 테스트")
     void tag_test2() {
 //        Edit configurations 에서 Hint 타입을 tags 로 변경 후 태그값 설정
         System.out.println("StudyTest.tag_test2");
     }
 
-//    @Tag 어노테이션을 사용했을 때 리터럴을 사용하기 때문에 type safe 하지 않다.
+    //    @Tag 어노테이션을 사용했을 때 리터럴을 사용하기 때문에 type safe 하지 않다.
     @FastTest
-    @DisplayName("8-1 커스텀 어노테이션 테스트")
+    @DisplayName("8-1. 커스텀 어노테이션 테스트")
     void custom_annotations_test1() {
         System.out.println("StudyTest.custom_annotations_test1");
     }
 
     @SlowTest
-    @DisplayName("8-1 커스텀 어노테이션 테스트")
+    @DisplayName("8-1. 커스텀 어노테이션 테스트")
     void custom_annotations_test2() {
         System.out.println("StudyTest.custom_annotations_test2");
     }
+
+    //    매 번 실행 할 때마다 랜덤 값을 쓴다거나, 테스트를 실행하는 타이밍에 따라 결과가 달라지는 경우
+//    테스트를 여러 번 해야 할 경우가 필요하다.
+    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+    @DisplayName("9-1. 반복 테스트")
+    void repeatTest(RepetitionInfo repetitionInfo) {
+        System.out.println("StudyTest.repeatTest : " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}")
+    @ValueSource(strings = {"A", "B", "C", "D"})
+    @DisplayName("9-2. 입력값이 바뀌는 반복 테스트")
+    void parameterized_test(String message) {
+        System.out.println(message);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}")
+    @EmptySource
+    @DisplayName("9-3. 입력값이 바뀌는 반복 테스트")
+    void parameterized_empty_test(String message) {
+        System.out.println(message);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}")
+    @NullAndEmptySource
+    @DisplayName("9-4. 입력값이 바뀌는 반복 테스트")
+    void parameterized_null_and_empty_test(String message) {
+        System.out.println(message);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}")
+    @ValueSource(ints = {10, 20, 30})
+    @DisplayName("9-5. 입력값이 바뀌는 반복 테스트")
+    void parameterized_integer_test(Integer integer) {
+        System.out.println(integer);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}")
+    @ValueSource(ints = {10, 20, 30})
+    @DisplayName("9-6. 입력값이 바뀌는 반복 테스트(단일 값)")
+    void parameterized_study_test1(@ConvertWith(StudyConverter.class) Study study) {
+        System.out.println(study);
+    }
+
+    static class StudyConverter extends SimpleArgumentConverter {
+        @Override
+        protected Object convert(Object o, Class<?> aClass) throws ArgumentConversionException {
+            assertEquals(Study.class, aClass, "Study 클래스만 변환 가능합니다.");
+            return new Study(Integer.parseInt(o.toString()));
+        }
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}, {1}")
+    @CsvSource({"10, '자바 스터디'", "20, '스프링'"})
+    @DisplayName("9-7. 입력값이 바뀌는 반복 테스트(다중 값)1")
+    void parameterized_study_test2(Integer limit, String name) {
+        Study study = new Study(limit, name);
+        System.out.println(study);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}, {1}")
+    @CsvSource({"10, '자바 스터디'", "20, '스프링'"})
+    @DisplayName("9-7. 입력값이 바뀌는 반복 테스트(다중 값)2")
+    void parameterized_study_test3(ArgumentsAccessor argumentsAccessor) {
+        Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+        System.out.println(study);
+    }
+
+    @ParameterizedTest(name = "{index} : {displayName} message={0}, {1}")
+    @CsvSource({"10, '자바 스터디'", "20, '스프링'"})
+    @DisplayName("9-7. 입력값이 바뀌는 반복 테스트(다중 값)3")
+    void parameterized_study_test4(@AggregateWith(StudyAggregator.class) Study study) {
+        System.out.println(study);
+    }
+
+    //ArgumentsAggregator 구현체는 반드시 static inner 클래스이거나 public 클래스여야 합니다.
+    static class StudyAggregator implements ArgumentsAggregator {
+        @Override
+        public Object aggregateArguments(ArgumentsAccessor argumentsAccessor, ParameterContext parameterContext) throws ArgumentsAggregationException {
+            return new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+        }
+    }
+
 }

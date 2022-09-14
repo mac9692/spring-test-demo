@@ -25,6 +25,14 @@ import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 // 언더바를 공백으로 치환해주는 설정
 //@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+
+// 테스트 클래스를 매 테스트마다 객체 생성하는게 아니라 한번만 생성함
+// 이 상태로는 @BeforeAll 이나 @AfterAll 메소드가 static 메소드일 필요가 없어짐
+// 시나리오 테스트를 할 경우는 필요함. 회원가입 -> 로그인 -> 구매 이런 식의 시나리오 테스트
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+// 테스트 순서를 설정하는 어노테이션 @Order 의 값이 낮을수록 더 높은 우선순위를 가짐
+// 바로 위 @TestInstance 어노테이션과는 연관없음.
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
     // 모든 테스트 실행 전 단 한번만 실행
     // 반드시 static 사용

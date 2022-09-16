@@ -22,7 +22,11 @@ public class Study {
         this.limitCount = limitCount;
     }
 
-    public void setOwner(Member member) {
+    public Member getOwner() {
+        return owner;
+    }
 
+    public void setOwner(Member owner) {
+        this.owner = owner;
     }
 }

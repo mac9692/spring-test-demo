@@ -5,6 +5,7 @@ import me.jinseong.springtestdemo.domain.Study;
 import me.jinseong.springtestdemo.member.MemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,12 +58,33 @@ class StudyServiceTest {
                 () -> assertEquals(Optional.empty(), memberService.findById(3L)),
                 () -> assertThrows(IllegalArgumentException.class, () -> memberService.validate(1L))
         );
+    }
 
-//        Study study = new Study(10, "java study");
-//        studyService.createNewStudy(1L, study);
-//
-//        Optional<Member> optionalMember = memberService.findById(1L);
-//        assertNull(optionalMember);
-//        memberService.findById(1L);
+
+    @Test
+    void mockStudyTest(@Mock MemberService memberService, @Mock StudyRepository studyRepository) {
+        StudyService studyService = new StudyService(memberService, studyRepository);
+        assertNotNull(studyService);
+
+        Member member = new Member();
+        member.setId(1L);
+        member.setEmail("p.naver.com");
+
+        Study study = new Study(10, "java study");
+
+        Mockito.when(memberService.findById(1L)).thenReturn(Optional.of(member));
+        Mockito.when(studyRepository.save(study)).thenReturn(study);
+
+        studyService.createNewStudy(1L, study);
+        assertEquals(member, study.getOwner());
+
+        Mockito.verify(memberService, Mockito.times(1)).notify(study);
+        Mockito.verify(memberService, Mockito.times(1)).notify(member);
+        Mockito.verifyNoMoreInteractions(memberService);
+        Mockito.verify(memberService, Mockito.never()).validate(any());
+
+        InOrder inOrder = Mockito.inOrder(memberService);
+        inOrder.verify(memberService).notify(study);
+        inOrder.verify(memberService).notify(member);
     }
 }

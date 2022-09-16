@@ -1,4 +1,8 @@
 package me.jinseong.springtestdemo.study;
 
-public class StudyStatus {
+public enum StudyStatus {
+    DRAFT,
+    OPENED,
+    STARTED,
+    ENDED
 }

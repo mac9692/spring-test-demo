@@ -22,6 +22,11 @@ public class StudyService {
     public Study createNewStudy(Long memberId, Study study) {
         Optional<Member> optionalMember = memberService.findById(memberId);
         study.setOwner(optionalMember.orElseThrow(() -> new IllegalArgumentException("해당 Id 의 멤버가 존재하지 않습니다. : " + memberId)));
-        return studyRepository.save(study);
+
+        Study newStudy = studyRepository.save(study);
+        memberService.notify(newStudy);
+        memberService.notify(optionalMember.get());
+
+        return newStudy;
     }
 }

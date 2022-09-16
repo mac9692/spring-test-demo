@@ -1,4 +1,4 @@
-package me.jinseong.springtestdemo;
+package me.jinseong.springtestdemo.junit;
 
 public class Study {
 

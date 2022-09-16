@@ -1,5 +1,7 @@
 package me.jinseong.springtestdemo;
 
+import me.jinseong.springtestdemo.junit.Study;
+import me.jinseong.springtestdemo.junit.StudyStatus;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
 import org.junit.jupiter.api.extension.ParameterContext;

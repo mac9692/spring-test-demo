@@ -25,4 +25,12 @@ class StudyServiceTest {
         StudyService studyService = new StudyService(memberService, studyRepository);
         assertNotNull(studyService);
     }
+
+    @Test
+    void createStudyService(@Mock MemberService memberService, @Mock StudyRepository studyRepository) {
+//        MemberService memberService = Mockito.mock(MemberService.class);
+//        StudyRepository studyRepository = Mockito.mock(StudyRepository.class);
+        StudyService studyService = new StudyService(memberService, studyRepository);
+        assertNotNull(studyService);
+    }
 }
